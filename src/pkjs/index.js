@@ -13,13 +13,28 @@ function sanitize(value) {
   return out;
 }
 
-function storedCall() {
+function storedCallRaw() {
   try {
-    var saved = sanitize(localStorage.getItem("callsign") || "");
-    return saved.length >= 3 ? saved : "W1AW";
+    return sanitize(localStorage.getItem("callsign") || "");
   } catch (e) {
-    return "W1AW";
+    return "";
   }
+}
+
+function storedCall() {
+  var saved = storedCallRaw();
+  return saved.length >= 3 ? saved : "W1AW";
+}
+
+function hasUserCallsign() {
+  return storedCallRaw().length >= 3;
+}
+
+function clayField(settings, key) {
+  if (!settings) return undefined;
+  var v = settings[key];
+  if (v && typeof v === "object" && "value" in v) return v.value;
+  return v;
 }
 
 function checkboxMask(arr, count) {
@@ -81,9 +96,14 @@ Pebble.addEventListener("appmessage", function(e) {
   var payload = e.payload || {};
 
   if (payload.SpotsRequest) {
-    var reqCall = sanitize(payload.Callsign) || storedCall();
+    var watchCall = sanitize(payload.Callsign);
+    var reqCall = hasUserCallsign() ? storedCall() : watchCall;
+    if (reqCall.length < 3) reqCall = storedCall();
     if (reqCall.length >= 3) {
       rbn.deliverSpots(reqCall, storedFilters());
+      if (watchCall.length >= 3 && watchCall !== reqCall) {
+        Pebble.sendAppMessage({ Callsign: reqCall });
+      }
     }
     return;
   }
@@ -103,19 +123,15 @@ Pebble.addEventListener("showConfiguration", function() {
 
 Pebble.addEventListener("webviewclosed", function(e) {
   if (!e || !e.response || e.response === "CANCELLED") return;
-  var dict = clay.getSettings(e.response);
-  saveFilters(dict || {});
-  if (dict && dict.Callsign) {
-    var clean = sanitize(dict.Callsign);
-    if (clean.length >= 3) {
-      dict = { Callsign: clean };
-      try { localStorage.setItem("callsign", clean); } catch (err) {}
-    } else {
-      dict = {};
-    }
-  } else {
-    dict = {};
+  var raw = clay.getSettings(e.response, false);
+  saveFilters({
+    FilterBands: clayField(raw, "FilterBands"),
+    FilterModes: clayField(raw, "FilterModes")
+  });
+  var clean = sanitize(clayField(raw, "Callsign"));
+  if (clean.length >= 3) {
+    try { localStorage.setItem("callsign", clean); } catch (err) {}
+    Pebble.sendAppMessage({ Callsign: clean });
   }
-  if (dict.Callsign) Pebble.sendAppMessage(dict);
   refreshSpots();
 });
