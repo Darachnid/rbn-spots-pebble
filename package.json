@@ -1,0 +1,47 @@
+{
+  "name": "rbn-spots",
+  "author": "AC1RV",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "@rebble/clay": "^1.1.0"
+  },
+  "pebble": {
+    "displayName": "RBN Spots",
+    "uuid": "bbcc0f48-ebac-49b4-bfc5-ea0eb353cc5e",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "emery",
+      "gabbro"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "capabilities": [
+      "configurable"
+    ],
+    "messageKeys": [
+      "Callsign",
+      "SpotsRequest",
+      "SpotsPayload",
+      "SpotsError",
+      "SpotsChunkIdx",
+      "SpotsChunkCount",
+      "SpotsChunkData"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "MENU_ICON",
+          "file": "images/menu_icon.png",
+          "menuIcon": true
+        }
+      ]
+    }
+  }
+}

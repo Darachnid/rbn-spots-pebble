@@ -1,0 +1,13 @@
+build/
+node_modules/
+.pebble-logs.pid
+.pebble-cloud-logs.pid
+pebble-logs.txt
+pebble-cloud-logs*.txt
+pebble-run*.log
+.pebble-cloud-logs.pid
+.pebble-logs.pid
+.lock-waf_linux_build
+pebble-run*.log
+*.pbw
+.lock-waf_*
